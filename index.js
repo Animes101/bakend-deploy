@@ -9,14 +9,21 @@ const { MongoClient, ServerApiVersion } = require('mongodb');
 
 
 
-console.log(PORT);
-
-
-
 
 app.use(express.json());
-app.use(cors())
+app.use(cors({
+  origin: ["http://localhost:5173"], // ✅ allowed origins
+  methods: ["GET", "POST", "PUT", "DELETE"], // কোন method allow করবে
+  credentials: true
+}));
 
+// ✅ fallback header (Vercel এ দরকার হয় অনেক সময়)
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*"); // সব origin allow করতে চাইলে
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  next();
+});
 
 
 app.get('/', (req,res)=>{
@@ -38,7 +45,7 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
-    await client.connect();
+    // await client.connect();
     console.log("✅ MongoDB Connected Successfully!");
 
     const userDB = client.db("userBD");
@@ -81,10 +88,4 @@ run().catch(console.dir);
 
 
 
-
-app.listen(3000, ()=>{
-
-
-
-    console.log(`server is running............${PORT}`)
-})
+module.exports = app;
